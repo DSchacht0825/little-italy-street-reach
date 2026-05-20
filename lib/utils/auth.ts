@@ -1,0 +1,88 @@
+import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { unstable_cache } from 'next/cache'
+
+export type UserRole = 'admin' | 'field_worker'
+
+export interface UserProfile {
+  id: string
+  email: string
+  role: UserRole
+  full_name?: string | null
+  created_at: string
+  updated_at: string
+}
+
+/**
+ * Check if a user is an admin (cached version)
+ */
+const getCachedUserRole = unstable_cache(
+  async (userId: string): Promise<UserRole | null> => {
+    const adminClient = createAdminClient()
+    const { data: profile, error: profileError } = await adminClient
+      .from('users')
+      .select('role')
+      .eq('id', userId)
+      .single()
+
+    if (profileError || !profile) {
+      return null
+    }
+
+    return (profile as { role: UserRole }).role
+  },
+  ['user-role'],
+  { revalidate: 60 } // Cache for 60 seconds
+)
+
+/**
+ * Check if the current user is an admin
+ * @returns true if user is admin, false otherwise
+ */
+export async function isAdmin(): Promise<boolean> {
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+
+    if (userError || !user) {
+      return false
+    }
+
+    const role = await getCachedUserRole(user.id)
+    return role === 'admin'
+  } catch (error) {
+    console.error('Unexpected error in isAdmin:', error)
+    return false
+  }
+}
+
+/**
+ * Get the current user's profile
+ * @returns UserProfile or null
+ */
+export async function getUserProfile(): Promise<UserProfile | null> {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return null
+  }
+
+  const { data: profile } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', user.id)
+    .single()
+
+  return profile as UserProfile | null
+}
+
+/**
+ * Get the current user's role
+ * @returns UserRole or null
+ */
+export async function getUserRole(): Promise<UserRole | null> {
+  const profile = await getUserProfile()
+  return profile?.role || null
+}

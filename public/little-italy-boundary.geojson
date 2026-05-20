@@ -1,0 +1,25 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Little Italy",
+        "city": "San Diego",
+        "state": "California"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-117.1719, 32.7266],
+            [-117.1650, 32.7266],
+            [-117.1650, 32.7188],
+            [-117.1719, 32.7188],
+            [-117.1719, 32.7266]
+          ]
+        ]
+      }
+    }
+  ]
+}
