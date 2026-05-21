@@ -143,6 +143,7 @@ export const SERVICE_SUBTYPES = [
   'No Shelter Available',
   'Phone Assessment',
   'Phone Assistance',
+  'Phone Inquiry',
   'Referral',
   'Refused Services',
   'Refused Shelter',
