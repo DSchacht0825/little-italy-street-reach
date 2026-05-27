@@ -1,6 +1,6 @@
 -- Add photo_url field to persons table
 ALTER TABLE public.persons
-ADD COLUMN photo_url TEXT;
+ADD COLUMN IF NOT EXISTS photo_url TEXT;
 
 -- Create storage bucket for client photos if it doesn't exist
 INSERT INTO storage.buckets (id, name, public)
